@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
@@ -11,6 +14,14 @@ public class GameController : MonoBehaviour
 
     private List<Tile> tiles = new List<Tile>();
 
+    enum State
+    {
+        PlayingSequence,
+        ReadingSequence
+    }
+
+    private State state;
+
 	// Use this for initialization
 	void Awake ()
 	{
@@ -19,21 +30,24 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        
         int numSteps = 3;
-        Queue<int> indxSequence = new Queue<int>();
+        generatedSequence = new Queue<int>();
         for (int i = 0; i < numSteps; i++)
         {
-            indxSequence.Enqueue(Random.Range(0, tiles.Count));
+            generatedSequence.Enqueue(Random.Range(0, tiles.Count));
         }
 
-        StartCoroutine(PlaySequence(indxSequence));
+        StartCoroutine(PlaySequence(generatedSequence));
     }
 
-    IEnumerator PlaySequence(Queue<int> indxSequence)
+    IEnumerator PlaySequence(Queue<int> generatedSequence)
     {
-        while (indxSequence.Count > 0)
+        var playingSequence = new Queue<int>(generatedSequence);
+        state = State.PlayingSequence;
+        while (playingSequence.Count > 0)
         {
-            int curTileIndx = indxSequence.Dequeue();
+            int curTileIndx = playingSequence.Dequeue();
             var tile = tiles[curTileIndx];
 
             HighlightTile(tile);
@@ -43,7 +57,10 @@ public class GameController : MonoBehaviour
             Debug.Log(animationTime);
             yield return new WaitForSeconds(animationTime);
         }
+        usersSequence.Clear();
+        state = State.ReadingSequence;
     }
+
     private void InitTiles()
     {
         int tileIndx = 0;
@@ -59,9 +76,28 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private Queue<int> usersSequence = new Queue<int>();
+    private Queue<int> generatedSequence;
+
     private void TileClicked(int tileIndx)
     {
+
         var tile = tiles[tileIndx];
+        switch (state)
+        {
+            case State.PlayingSequence:
+                break;
+            case State.ReadingSequence:
+                usersSequence.Enqueue(tileIndx);
+
+                if (usersSequence.SequenceEqual(generatedSequence))
+                {
+                    Debug.Log("you get it");
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private static void HighlightTile(Tile tile)
