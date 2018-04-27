@@ -62,7 +62,6 @@ public class GameController : MonoBehaviour
     private void TileClicked(int tileIndx)
     {
         var tile = tiles[tileIndx];
-        HighlightTile(tile);
     }
 
     private static void HighlightTile(Tile tile)
