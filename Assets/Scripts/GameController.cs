@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,7 +8,7 @@ public class GameController : MonoBehaviour
 
     public GameObject Grid;
 
-    private List<GameObject> tiles;
+    private List<Tile> tiles = new List<Tile>();
 
 	// Use this for initialization
 	void Start ()
@@ -18,6 +16,7 @@ public class GameController : MonoBehaviour
 	    int tileIndx = 0;
 	    foreach (var tile in Grid.GetComponentsInChildren<Tile>())
 	    {
+            tiles.Add(tile);
 	        EventTrigger.Entry entry = new EventTrigger.Entry {eventID = EventTriggerType.PointerClick};
 	        var indx = tileIndx;
 	        entry.callback.AddListener(x=>{ TileClicked(indx);});
@@ -25,11 +24,12 @@ public class GameController : MonoBehaviour
 	        eventTrigger.triggers.Add(entry);
 	        tileIndx++;
 	    }
-	    Grid.GetComponentsInChildren<EventTrigger>();
 	}
 
     private void TileClicked(int tileIndx)
     {
+        tiles[tileIndx].GetComponent<Animator>().SetTrigger("highlight");
+
         Debug.Log(string.Format("tile {0} was clicked", tileIndx));
     }
 
