@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Random = UnityEngine.Random;
@@ -25,6 +26,8 @@ public class GameController : MonoBehaviour
     }
 
     private State state;
+    public float highlightSpeed;
+    public float pauseBetweenSteps = .3f;
 
 
     // Use this for initialization
@@ -34,12 +37,8 @@ public class GameController : MonoBehaviour
 	    InitTiles();
 	}
 
-    void Start()
-    {
-        StartSession();
-    }
 
-    private void StartSession()
+    public void StartSession()
     {
         int numSteps = 2;
         generatedSequence = new Queue<int>();
@@ -65,12 +64,17 @@ public class GameController : MonoBehaviour
             int curTileIndx = playingSequence.Dequeue();
             var tile = tiles[curTileIndx];
 
-            HighlightTile(tile);
+            highlightSpeed = 4f;
+            HighlightTile(tile, highlightSpeed);
             var animator = tile.GetComponent<Animator>();
-            var animationTime = animator.GetCurrentAnimatorStateInfo(0).length ;
+
+            yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("FadeInFadeOut"));
+            var animationTime = animator.GetCurrentAnimatorStateInfo(0).length;
+
+            
 
             Debug.Log(animationTime);
-            yield return new WaitForSeconds(animationTime);
+            yield return new WaitForSeconds(animationTime + pauseBetweenSteps);
         }
         usersSequence.Clear();
         state = State.ReadingSequence;
@@ -114,8 +118,10 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private static void HighlightTile(Tile tile)
+    private static void HighlightTile(Tile tile, float highlightSpeed)
     {
-        tile.GetComponent<Animator>().SetTrigger("highlight");
+        var animator = tile.GetComponent<Animator>();
+        animator.SetFloat("speed", highlightSpeed);
+        animator.SetTrigger("highlight");
     }
 }
