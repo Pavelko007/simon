@@ -9,8 +9,7 @@ using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
-    public GameObject TilePrefab;
-
+    public GameObject GameOverPanel;
     public GameObject Grid;
 
     private List<Tile> tiles = new List<Tile>();
@@ -35,6 +34,7 @@ public class GameController : MonoBehaviour
     void Awake ()
 	{
 	    InitTiles();
+	    GameOverPanel.SetActive(false);
 	}
 
 
@@ -111,8 +111,10 @@ public class GameController : MonoBehaviour
                 }
                 else if (usersSequence.Count == generatedSequence.Count)
                 {
+                    GameOverPanel.SetActive(true);
                     state = State.GameOver;
                     Debug.Log("game over");
+
                 }
                 break;
         }
