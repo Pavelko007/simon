@@ -14,24 +14,34 @@ public class GameController : MonoBehaviour
 
     private List<Tile> tiles = new List<Tile>();
 
+    private Queue<int> usersSequence = new Queue<int>();
+    private Queue<int> generatedSequence;
+
     enum State
     {
         PlayingSequence,
-        ReadingSequence
+        ReadingSequence,
+        GameOver
     }
 
     private State state;
 
-	// Use this for initialization
-	void Awake ()
+
+    // Use this for initialization
+
+    void Awake ()
 	{
 	    InitTiles();
 	}
 
     void Start()
     {
-        
-        int numSteps = 3;
+        StartSession();
+    }
+
+    private void StartSession()
+    {
+        int numSteps = 2;
         generatedSequence = new Queue<int>();
         for (int i = 0; i < numSteps; i++)
         {
@@ -76,27 +86,22 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private Queue<int> usersSequence = new Queue<int>();
-    private Queue<int> generatedSequence;
-
     private void TileClicked(int tileIndx)
     {
-
-        var tile = tiles[tileIndx];
         switch (state)
         {
-            case State.PlayingSequence:
-                break;
             case State.ReadingSequence:
                 usersSequence.Enqueue(tileIndx);
 
                 if (usersSequence.SequenceEqual(generatedSequence))
                 {
                     Debug.Log("you get it");
+                }else if (usersSequence.Count == generatedSequence.Count)
+                {
+                    state = State.GameOver;
+                    Debug.Log("game over");
                 }
                 break;
-            default:
-                throw new ArgumentOutOfRangeException();
         }
     }
 
