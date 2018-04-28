@@ -28,7 +28,6 @@ public class GameController : MonoBehaviour
     public float highlightSpeed;
     public float pauseBetweenSteps = .3f;
 
-
     // Use this for initialization
 
     void Awake ()
@@ -40,6 +39,7 @@ public class GameController : MonoBehaviour
 
     public void StartSession()
     {
+        GameOverPanel.SetActive(false);
         int numSteps = 2;
         generatedSequence = new Queue<int>();
         for (int i = 0; i < numSteps; i++)
@@ -101,23 +101,33 @@ public class GameController : MonoBehaviour
         {
             case State.ReadingSequence:
                 usersSequence.Enqueue(tileIndx);
-
-                if (usersSequence.SequenceEqual(generatedSequence))
+                if (IsUserSequenceCorrect())
                 {
-                    Debug.Log("you get it, try more");
-
-                    AddNextStep();
-                    StartCoroutine(PlaySequence(generatedSequence));
+                    if (IsInputComplete())
+                    {
+                        AddNextStep();
+                        StartCoroutine(PlaySequence(generatedSequence));
+                    }
                 }
-                else if (usersSequence.Count == generatedSequence.Count)
+                else  
                 {
                     GameOverPanel.SetActive(true);
                     state = State.GameOver;
-                    Debug.Log("game over");
-
                 }
+                
                 break;
         }
+    }
+
+    private bool IsInputComplete()
+    {
+        return usersSequence.Count == generatedSequence.Count;
+    }
+
+    private bool IsUserSequenceCorrect()
+    {
+        var generatedSubsequence = generatedSequence.Take(usersSequence.Count);
+        return usersSequence.SequenceEqual(generatedSubsequence);
     }
 
     private static void HighlightTile(Tile tile, float highlightSpeed)
