@@ -5,12 +5,14 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
     public GameObject GameOverPanel;
     public GameObject Grid;
+    public Text ScoreText;
 
     private List<Tile> tiles = new List<Tile>();
 
@@ -27,6 +29,7 @@ public class GameController : MonoBehaviour
     private State state;
     public float highlightSpeed;
     public float pauseBetweenSteps = .3f;
+    private int score = 0;
 
     // Use this for initialization
 
@@ -34,11 +37,14 @@ public class GameController : MonoBehaviour
 	{
 	    InitTiles();
 	    GameOverPanel.SetActive(false);
+
 	}
 
 
     public void StartSession()
     {
+        score = 0;
+        SetScoreText();
         GameOverPanel.SetActive(false);
         int numSteps = 2;
         generatedSequence = new Queue<int>();
@@ -48,6 +54,11 @@ public class GameController : MonoBehaviour
         }
 
         StartCoroutine(PlaySequence(generatedSequence));
+    }
+
+    private void SetScoreText()
+    {
+        ScoreText.text = string.Format("Score: {0}", score);
     }
 
     private void AddNextStep()
@@ -103,6 +114,8 @@ public class GameController : MonoBehaviour
                 usersSequence.Enqueue(tileIndx);
                 if (IsUserSequenceCorrect())
                 {
+                    score++;
+                    SetScoreText();
                     if (IsInputComplete())
                     {
                         AddNextStep();
@@ -111,6 +124,7 @@ public class GameController : MonoBehaviour
                 }
                 else  
                 {
+
                     GameOverPanel.SetActive(true);
                     state = State.GameOver;
                 }
