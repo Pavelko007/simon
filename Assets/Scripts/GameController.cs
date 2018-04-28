@@ -13,6 +13,7 @@ public class GameController : MonoBehaviour
     public GameObject GameOverPanel;
     public GameObject Grid;
     public Text ScoreText;
+    public Text HighscoreText;
 
     private List<Tile> tiles = new List<Tile>();
 
@@ -30,6 +31,17 @@ public class GameController : MonoBehaviour
     public float highlightSpeed;
     public float pauseBetweenSteps = .3f;
     private int score = 0;
+    private int highscore = 0;
+
+    public int Highscore
+    {
+        get { return highscore; }
+        set
+        {
+            highscore = value;
+            UpdateHighScoreText();
+        }
+    }
 
     // Use this for initialization
 
@@ -37,14 +49,15 @@ public class GameController : MonoBehaviour
 	{
 	    InitTiles();
 	    GameOverPanel.SetActive(false);
-
-	}
+	    Highscore = 0;
+    }
 
 
     public void StartSession()
     {
         score = 0;
         SetScoreText();
+        
         GameOverPanel.SetActive(false);
         int numSteps = 2;
         generatedSequence = new Queue<int>();
@@ -54,6 +67,11 @@ public class GameController : MonoBehaviour
         }
 
         StartCoroutine(PlaySequence(generatedSequence));
+    }
+
+    private void UpdateHighScoreText()
+    {
+        HighscoreText.text = string.Format("HighScore: {0}", Highscore);
     }
 
     private void SetScoreText()
@@ -116,6 +134,11 @@ public class GameController : MonoBehaviour
                 {
                     score++;
                     SetScoreText();
+
+                    if (highscore < score)
+                    {
+                        highscore = score;
+                    }
                     if (IsInputComplete())
                     {
                         AddNextStep();
@@ -124,7 +147,7 @@ public class GameController : MonoBehaviour
                 }
                 else  
                 {
-
+                    Highscore = Math.Min(Highscore, score);
                     GameOverPanel.SetActive(true);
                     state = State.GameOver;
                 }
