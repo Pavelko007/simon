@@ -45,10 +45,15 @@ public class GameController : MonoBehaviour
         generatedSequence = new Queue<int>();
         for (int i = 0; i < numSteps; i++)
         {
-            generatedSequence.Enqueue(Random.Range(0, tiles.Count));
+            AddNextStep();
         }
 
         StartCoroutine(PlaySequence(generatedSequence));
+    }
+
+    private void AddNextStep()
+    {
+        generatedSequence.Enqueue(Random.Range(0, tiles.Count));
     }
 
     IEnumerator PlaySequence(Queue<int> generatedSequence)
@@ -95,8 +100,12 @@ public class GameController : MonoBehaviour
 
                 if (usersSequence.SequenceEqual(generatedSequence))
                 {
-                    Debug.Log("you get it");
-                }else if (usersSequence.Count == generatedSequence.Count)
+                    Debug.Log("you get it, try more");
+
+                    AddNextStep();
+                    StartCoroutine(PlaySequence(generatedSequence));
+                }
+                else if (usersSequence.Count == generatedSequence.Count)
                 {
                     state = State.GameOver;
                     Debug.Log("game over");
